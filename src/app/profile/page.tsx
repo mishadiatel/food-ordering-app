@@ -3,16 +3,12 @@ import {useSession} from 'next-auth/react';
 import {redirect} from 'next/navigation';
 import Image from 'next/image';
 import {FormEvent, useEffect, useState} from 'react';
-import InfoBox from '@/components/layout/InfoBox';
-import SuccessBox from '@/components/layout/SuccessBox';
+import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
     const session = useSession();
     const [userName, setUserName] = useState('');
     const [image, setImage] = useState('');
-    const [saved, setSaved] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
     const {status} = session;
     useEffect(() => {
         setUserName(session.data?.user?.name!);
@@ -24,22 +20,24 @@ export default function ProfilePage() {
     if (status === 'unauthenticated') {
         return redirect('/login');
     }
-    // const userImage = session.data?.user?.image!;
 
     async function handleProfileInfoUpdate(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        setSaved(false);
-        setIsSaving(true);
-        const response = await fetch('/api/profile', {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({name: userName, image})
+        const savingPromise: Promise<void> = new Promise(async (resolve, reject) => {
+            const response = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name: userName, image})
+            });
+            if (response.ok) resolve();
+            else reject();
         });
-        if (response.ok) {
-            setSaved(true);
-            setTimeout(() => setSaved(false), 3000);
-        }
-        setIsSaving(false);
+        await toast.promise(savingPromise, {
+            loading: 'Saving...',
+            success: 'Profile saved',
+            error: 'Error'
+        });
+
     }
 
     async function handleFileChange(event: FormEvent<HTMLInputElement>) {
@@ -47,16 +45,28 @@ export default function ProfilePage() {
         const files = event.currentTarget.files;
         if (files && files.length > 0) {
             const data = new FormData;
-            data.set('file', files[0])
-            setIsUploading(true);
-            const response = await fetch('/api/upload', {
+            data.set('file', files[0]);
+            const uploadPromise: Promise<void> = fetch('/api/upload', {
                 method: 'POST',
-                body: data,
+                body: data
+            }).then(response => {
+                if (response.ok) {
+                    return response.json().then(link => {
+                        setImage(link);
+                    });
+                }
+                throw new Error('Something went wrong');
             });
-            const link = await response.json();
-            setImage(link);
-            setIsUploading(false)
+
+
+            await toast.promise(uploadPromise, {
+                loading: 'Uploading...',
+                success: 'Uploads complete',
+                error: 'Error uploading photo'
+            });
         }
+
+
     }
 
     return (
@@ -65,15 +75,6 @@ export default function ProfilePage() {
                 Profile
             </h1>
             <div className={'max-w-md mx-auto '}>
-                {saved && (
-                    <SuccessBox>Profile saved</SuccessBox>
-                )}
-                {isSaving && (
-                    <InfoBox>Saving...</InfoBox>
-                )}
-                {isUploading && (
-                    <InfoBox>Uploading...</InfoBox>
-                )}
                 <div className={'flex gap-4 items-center'}>
                     <div>
                         <div className={' p-2 rounded-lg relative'}>
@@ -92,10 +93,10 @@ export default function ProfilePage() {
 
                     </div>
                     <form className={'grow'} onSubmit={handleProfileInfoUpdate}>
-                        <input type="text" placeholder={'First and last name'} disabled={isSaving}
+                        <input type="text" placeholder={'First and last name'}
                                value={userName} onChange={e => setUserName(e.target.value)}/>
                         <input type="email" value={session.data?.user?.email!} disabled={true}/>
-                        <button type={'submit'} disabled={isSaving}>Save</button>
+                        <button type={'submit'}>Save</button>
                     </form>
 
                 </div>
