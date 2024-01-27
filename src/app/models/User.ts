@@ -5,6 +5,11 @@ interface UserDocument extends Document {
     image?: string;
     email: string;
     password: string;
+    phone?: string;
+    streetAddress?: string;
+    postalCode?: string;
+    country?: string;
+    city?: string;
 }
 
 const userSchema = new Schema({
@@ -17,7 +22,12 @@ const userSchema = new Schema({
     },
     password: {
         type: String
-    }
+    },
+    phone: {type: String},
+    streetAddress: {type: String},
+    postalCode: {type: String},
+    country: {type: String},
+    city: {type: String},
 }, {
     timestamps: true
 });
