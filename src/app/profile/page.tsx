@@ -1,9 +1,10 @@
 'use client';
 import {useSession} from 'next-auth/react';
 import {redirect} from 'next/navigation';
-import Image from 'next/image';
 import {FormEvent, useEffect, useState} from 'react';
 import toast from 'react-hot-toast';
+import UserTabs from '@/components/layout/Tabs';
+import EditableImage from '@/components/layout/EditableImage';
 
 export default function ProfilePage() {
     const session = useSession();
@@ -14,6 +15,8 @@ export default function ProfilePage() {
     const [postalCode, setPostalCode] = useState('');
     const [city, setCity] = useState('');
     const [country, setCountry] = useState('');
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [profilefetched, setProfileFetched] = useState(false);
     const {status} = session;
 
     useEffect(() => {
@@ -27,6 +30,8 @@ export default function ProfilePage() {
                     setPostalCode(data.postalCode);
                     setCity(data.city);
                     setCountry(data.country);
+                    setIsAdmin(data.admin);
+                    setProfileFetched(true);
                 });
             });
         }
@@ -66,55 +71,14 @@ export default function ProfilePage() {
 
     }
 
-    async function handleFileChange(event: FormEvent<HTMLInputElement>) {
-
-        const files = event.currentTarget.files;
-        if (files && files.length > 0) {
-            const data = new FormData;
-            data.set('file', files[0]);
-            const uploadPromise: Promise<void> = fetch('/api/upload', {
-                method: 'POST',
-                body: data
-            }).then(response => {
-                if (response.ok) {
-                    return response.json().then(link => {
-                        setImage(link);
-                    });
-                }
-                throw new Error('Something went wrong');
-            });
-
-
-            await toast.promise(uploadPromise, {
-                loading: 'Uploading...',
-                success: 'Uploads complete',
-                error: 'Error uploading photo'
-            });
-        }
-
-
-    }
-
     return (
         <section className={'mt-8'}>
-            <h1 className={'text-center text-primary text-4xl mb-4'}>
-                Profile
-            </h1>
-            <div className={'max-w-md mx-auto '}>
+            <UserTabs isAdmin={isAdmin}/>
+            <div className={'max-w-md mx-auto mt-8 '}>
                 <div className={'flex gap-4 '}>
                     <div>
                         <div className={' p-2 rounded-lg relative'}>
-                            {image && (
-                                <Image src={image} alt={'user image avatar'} width={250} height={250}
-                                       className={'rounded-lg w-full h-full mb-1 max-w-[120px]'}/>
-                            )}
-
-                            <label>
-                                <input type="file" className={'hidden'} onChange={handleFileChange}/>
-                                <span className={'block border-gray-300 rounded-lg p-2 text-center cursor-pointer'}>
-                                    Edit
-                                </span>
-                            </label>
+                            <EditableImage link={image} setLink={setImage}/>
                         </div>
 
                     </div>
