@@ -17,7 +17,7 @@ const userSchema = new Schema({
     },
     password: {
         type: String
-    },
+    }
 }, {
     timestamps: true
 });

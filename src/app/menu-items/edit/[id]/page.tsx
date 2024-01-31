@@ -1,18 +1,38 @@
 'use client';
 import useProfile from '@/hooks/useProfile';
 import UserTabs from '@/components/layout/Tabs';
-import EditableImage from '@/components/layout/EditableImage';
-import {FormEvent, useState} from 'react';
+import {FormEvent, useEffect, useState} from 'react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import Left from '@/components/icons/Left';
-import {redirect} from 'next/navigation';
+import {redirect, useParams} from 'next/navigation';
 import MenuItemForm, {MenuItemWithPrices} from '@/components/layout/MenuItemForm';
-import {MenuItem} from '@/app/menu-items/edit/[id]/page';
 
-export default function NewMenuItemPage() {
+export interface MenuItem {
+    _id: string,
+    name: string,
+    image: string,
+    basePrice: number,
+    description: string,
+    sizes: { name: string, price: number }[],
+    extraIngredientPrices: { name: string, price: number }[],
+}
+
+
+export default function EditMenuItemPage() {
+    const {id} = useParams();
+    const [menuItem, setMenuItem] = useState<MenuItem | undefined>(undefined);
     const [redirectToItems, setRedirectToItems] = useState(false);
     const {loading, data} = useProfile();
+
+    useEffect(() => {
+        fetch('/api/menu-items').then(res => {
+            res.json().then((menuItems: MenuItem[]) => {
+                const item = menuItems.find(item => item._id === id);
+                setMenuItem(item);
+            });
+        });
+    }, []);
 
     if (loading) {
         return <div>Loading user info...</div>;
@@ -25,9 +45,9 @@ export default function NewMenuItemPage() {
         event.preventDefault();
         const savingPromise: Promise<void> = new Promise(async (resolve, reject) => {
             const response = await fetch('/api/menu-items', {
-                method: 'POST',
+                method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
+                body: JSON.stringify({...data, _id: id})
             });
             if (response.ok) resolve();
             else reject();
@@ -53,7 +73,7 @@ export default function NewMenuItemPage() {
                     <span>Show all menu items</span>
                 </Link>
             </div>
-            <MenuItemForm onSubmit={handleFormSubmit} />
+            <MenuItemForm onSubmit={handleFormSubmit} menuItem={menuItem}/>
         </section>
     );
 }

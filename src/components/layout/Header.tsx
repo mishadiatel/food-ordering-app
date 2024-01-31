@@ -8,7 +8,7 @@ export default function Header() {
     const userData = session.data?.user;
     let userName = userData?.name || userData?.email ;
     userName = userName?.includes(' ') ? userName?.split(' ')[0] : userName;
-    console.log(session);
+    // console.log(session);
     return (
         <header className={'flex items-center justify-between'}>
 
