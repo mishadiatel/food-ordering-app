@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Left from '@/components/icons/Left';
 import {redirect, useParams} from 'next/navigation';
 import MenuItemForm, {MenuItemWithPrices} from '@/components/layout/MenuItemForm';
+import DeleteButton from '@/components/DeleteButton';
 
 export interface MenuItem {
     _id: string,
@@ -60,6 +61,23 @@ export default function EditMenuItemPage() {
         setRedirectToItems(true);
     }
 
+    async function handleDeleteClick() {
+        const deletePromise: Promise<void> = new Promise(async (resolve, reject) => {
+            const response = await fetch(`/api/menu-items?_id=${id}`, {
+                method: 'DELETE',
+            })
+            if (response.ok) resolve();
+            else reject();
+        })
+        await toast.promise(deletePromise, {
+            loading: 'Deleting this tasty item...',
+            success: 'Item deleted!',
+            error: 'Error.'
+        });
+        setRedirectToItems(true);
+
+    }
+
     if (redirectToItems) {
         return redirect('/menu-items');
     }
@@ -74,6 +92,12 @@ export default function EditMenuItemPage() {
                 </Link>
             </div>
             <MenuItemForm onSubmit={handleFormSubmit} menuItem={menuItem}/>
+            <div className={'max-w-md mx-auto mt-2'}>
+                <div className={' max-w-xs ml-auto pl-4'}>
+                    <DeleteButton label={'Delete this menu item'} onDelete={handleDeleteClick}/>
+                </div>
+
+            </div>
         </section>
     );
 }

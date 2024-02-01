@@ -16,6 +16,14 @@ export async function PUT(req: Request) {
     return Response.json(true);
 }
 
+export async function DELETE(req: Request) {
+    mongoose.connect(process.env.MONGO_URL!);
+    const url = new URL(req.url);
+    const _id = url.searchParams.get('_id');
+    await Category.deleteOne({_id});
+    return Response.json(true);
+}
+
 export async function GET() {
     mongoose.connect(process.env.MONGO_URL!);
     const categories = await Category.find();
