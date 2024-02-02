@@ -1,6 +1,9 @@
 'use client';
 import Link from 'next/link';
 import {signOut, useSession} from 'next-auth/react';
+import {useContext} from 'react';
+import {CartContext} from '@/components/AppContext';
+import ShoppingCart from '@/components/icons/ShoppingCart';
 
 export default function Header() {
     const session = useSession();
@@ -8,7 +11,7 @@ export default function Header() {
     const userData = session.data?.user;
     let userName = userData?.name || userData?.email ;
     userName = userName?.includes(' ') ? userName?.split(' ')[0] : userName;
-    // console.log(session);
+   const {cartProducts} = useContext(CartContext)
     return (
         <header className={'flex items-center justify-between'}>
 
@@ -17,9 +20,9 @@ export default function Header() {
                     ST PIZZA
                 </Link>
                 <Link href={'/'}>Home</Link>
-                <Link href={'/'}>Menu</Link>
-                <Link href={'/'}>About</Link>
-                <Link href={'/'}>Contact</Link>
+                <Link href={'/menu'}>Menu</Link>
+                <Link href={'/#about'}>About</Link>
+                <Link href={'/#contact'}>Contact</Link>
 
             </nav>
             <nav className={'flex items-center gap-8'}>
@@ -45,6 +48,12 @@ export default function Header() {
                     </>
 
                 )}
+                <Link href={'/cart'} className={'relative'}>
+                    <ShoppingCart />
+                    <span className={'absolute -top-2 -right-4 bg-primary text-white text-xs py-1 px-1 rounded-full leading-3'}>{cartProducts.length}</span>
+
+                </Link>
+
 
 
             </nav>

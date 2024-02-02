@@ -5,8 +5,8 @@ import MenuItemPriceProps, {ExtraPrice} from '@/components/layout/MenuItemPriceP
 import {Category} from '@/app/categories/page';
 
 export interface MenuItemWithPrices extends Partial<MenuItem> {
-    sizes: ExtraPrice[];
-    extraIngredientPrices: ExtraPrice[];
+    sizes?: ExtraPrice[];
+    extraIngredientPrices?: ExtraPrice[];
 }
 
 interface MenuItemFormProps {

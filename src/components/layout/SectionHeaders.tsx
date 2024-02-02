@@ -1,6 +1,6 @@
 interface SectionHeadersProps {
-    subHeader: string;
-    mainHeader: string;
+    subHeader?: string;
+    mainHeader?: string;
 }
 
 export default function SectionHeaders({subHeader, mainHeader}: SectionHeadersProps) {
