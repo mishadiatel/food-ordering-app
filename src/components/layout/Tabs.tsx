@@ -22,7 +22,7 @@ export default function UserTabs({isAdmin}: Readonly<{ isAdmin: boolean }>) {
                         Menu Items
                     </Link>
                     <Link href={'/users'}
-                          className={path === '/users' ? 'active' : ''}>
+                          className={path.includes('/users') ? 'active' : ''}>
                         Users
                     </Link>
                     <Link href={'/orders'}

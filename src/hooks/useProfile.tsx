@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 
-interface IUser {
+export interface IUser {
+    _id?: string;
     email?: string;
     phone?: string;
     streetAddress?: string;
