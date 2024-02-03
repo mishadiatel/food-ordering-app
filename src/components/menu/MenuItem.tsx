@@ -70,7 +70,7 @@ export default function MenuItem({item}: { item: MenuItemWithPrices }) {
                                 ))}
                             </div>
                         )}
-                        {extraIngredientPrices?.length && extraIngredientPrices?.length > 0 && (
+                        {extraIngredientPrices && extraIngredientPrices.length > 0 && (
                             <div className={'py-2'}>
                                 <h3 className={'text-center text-gray-700'}>Any extras?</h3>
                                 {extraIngredientPrices.map((extraThing, index) => (

@@ -2,6 +2,7 @@
 import EditableImage from '@/components/layout/EditableImage';
 import {FormEvent, useState} from 'react';
 import useProfile, {IUser} from '@/hooks/useProfile';
+import AddressInputs from '@/components/layout/AddressInputs';
 
 interface UserFormProps {
     user?: IUser;
@@ -18,8 +19,29 @@ export default function UserForm({user, onSave}: UserFormProps) {
     const [country, setCountry] = useState(user?.country || '');
     const [admin, setAdmin] = useState(user?.admin || false);
 
+    function handleAddressChange(propName: string, value: string) {
+        switch (propName) {
+            case 'phone':
+                setPhone(value);
+                break;
+            case 'streetAddress':
+                setStreetAddress(value);
+                break;
+            case 'postalCode':
+                setPostalCode(value);
+                break;
+            case 'city':
+                setCity(value);
+                break;
+            case 'country':
+                setCountry(value);
+                break;
+            default:
+                break;
+        }
+    }
+
     const {data: loggedInUser} = useProfile();
-    console.log(user);
     return (
         <div className={'flex gap-4 '}>
             <div>
@@ -47,32 +69,8 @@ export default function UserForm({user, onSave}: UserFormProps) {
                 <label>Email</label>
                 <input type="email" value={user?.email}
                        disabled={true} placeholder={'Email'}/>
-                <label>Phone number</label>
-                <input type="tel" placeholder={'Phone number'}
-                       value={phone} onChange={e => setPhone(e.target.value)}/>
-                <label>
-                    Street address
-                </label>
-                <input type="text" placeholder={'Street address'}
-                       value={streetAddress} onChange={e => setStreetAddress(e.target.value)}/>
-                <div className={'grid grid-cols-2 gap-2'}>
-                    <div>
-                        <label>
-                            Postal code
-                        </label>
-                        <input type="text" placeholder={'Postal code'} value={postalCode}
-                               onChange={e => setPostalCode(e.target.value)}/>
-                    </div>
-                    <div>
-                        <label>City</label>
-                        <input type="text" placeholder={'City'} value={city}
-                               onChange={e => setCity(e.target.value)}/>
-                    </div>
-
-                </div>
-                <label>Country</label>
-                <input type="text" placeholder={'Country'} value={country}
-                       onChange={e => setCountry(e.target.value)}/>
+                <AddressInputs addressProps={{streetAddress, postalCode, city, country, phone}}
+                               setAddressProp={handleAddressChange} />
                 {loggedInUser.admin && (
                     <div>
                         <label className={'p-2 inline-flex items-center gap-2 '}>

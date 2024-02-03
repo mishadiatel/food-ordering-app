@@ -1,4 +1,5 @@
 import {MenuItemWithPrices} from '@/components/layout/MenuItemForm';
+import AddToCartButton from '@/components/menu/AddToCartButton';
 
 export default function MenuItemTile({onAddToCart, item}: { onAddToCart: () => void, item: MenuItemWithPrices }) {
     const {
@@ -9,6 +10,9 @@ export default function MenuItemTile({onAddToCart, item}: { onAddToCart: () => v
         sizes,
         extraIngredientPrices
     } = item;
+
+    const hasSizesOrExtras = (sizes && sizes.length > 0) || (extraIngredientPrices && extraIngredientPrices.length > 0);
+
     return (
         <div
             className={'bg-gray-200 rounded-lg p-4 text-center hover:bg-white transition-all hover:shadow-md hover:shadow-black/25'}>
@@ -20,15 +24,7 @@ export default function MenuItemTile({onAddToCart, item}: { onAddToCart: () => v
             <p className={'text-gray-500 text-sm line-clamp-3'}>
                 {description}
             </p>
-            <button className={'bg-primary text-white rounded-full px-8 py-2 mt-4'}
-                    onClick={onAddToCart}
-            >
-                {(sizes && sizes.length > 0) || (extraIngredientPrices && extraIngredientPrices.length > 0) ?
-                    (<span>Add to cart (From ${basePrice})</span>) :
-                    (<span>Add to cart ${basePrice}</span>)
-                }
-
-            </button>
+            <AddToCartButton onAddToCart={onAddToCart} hasSizesOrExtras={hasSizesOrExtras} basePrice={basePrice}/>
         </div>
     );
 }
