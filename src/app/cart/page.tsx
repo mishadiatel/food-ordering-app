@@ -1,11 +1,12 @@
 'use client';
 import SectionHeaders from '@/components/layout/SectionHeaders';
 import {CartContext, cartProductPrice} from '@/components/AppContext';
-import {useContext, useEffect, useState} from 'react';
+import {FormEvent, useContext, useEffect, useState} from 'react';
 import Image from 'next/image';
 import Trash from '@/components/icons/Trash';
 import AddressInputs from '@/components/layout/AddressInputs';
 import useProfile from '@/hooks/useProfile';
+import toast from 'react-hot-toast';
 
 export default function CartPage() {
     const {cartProducts, removeCartProducts} = useContext(CartContext);
@@ -17,9 +18,10 @@ export default function CartPage() {
         country: ''
     });
     const {data: profileData} = useProfile();
-    const total = cartProducts.reduce((acc, product) => acc + cartProductPrice(product), 0);
+    const subtotal = cartProducts.reduce((acc, product) => acc + cartProductPrice(product), 0);
+
     useEffect(() => {
-        if(profileData) {
+        if (profileData) {
             setAddress({
                 phone: profileData.phone || '',
                 streetAddress: profileData.streetAddress || '',
@@ -29,6 +31,38 @@ export default function CartPage() {
             });
         }
     }, [profileData]);
+
+    async function proceedToCheckout(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        const promise: Promise<void> = new Promise((resolve, reject) => {
+            fetch('/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    cartProducts,
+                    address
+                })
+            }).then(async response => {
+                if (response.ok) {
+                    resolve();
+                    window.location.href = await response.json();
+                } else {
+                    reject();
+                }
+            });
+        });
+
+        await toast.promise(promise, {
+            loading: 'Preparing your order...',
+            success: 'Redirecting to payment...',
+            error: 'Something went wrong. Please try again latter'
+        })
+
+
+    }
 
 
     function handleAddressChange(propName: string, value: string) {
@@ -83,17 +117,26 @@ export default function CartPage() {
 
                         </div>
                     ))}
-                    <div className={'py-2 text-right pr-16'}>
-                        <span className={'text-gray-500'}>Subtotal:</span>
-                        <span className={'text-lg font-semibold pl-2'}>${total}</span>
+                    <div className={'py-2 pr-16 flex justify-end items-center'}>
+                        <div className={'text-gray-500'}>
+                            Subtotal: <br/>
+                            Delivery: <br/>
+                            Total:
+                        </div>
+                        <div className={'font-semibold pl-2 text-right'}>
+                            ${subtotal} <br/>
+                            $5 <br/>
+                            ${subtotal + 5}
+                        </div>
                     </div>
+
                 </div>
                 <div className={'bg-gray-100 rounded-lg p-4'}>
                     <h2>Checkout</h2>
-                    <form>
+                    <form onSubmit={proceedToCheckout}>
                         <AddressInputs addressProps={address}
                                        setAddressProp={handleAddressChange}/>
-                        <button type={'submit'}>Pay ${total}</button>
+                        <button type={'submit'}>Pay ${subtotal + 5}</button>
                     </form>
                 </div>
             </div>
